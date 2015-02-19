@@ -2,15 +2,17 @@
 # encoding: utf-8
 
 
-# this program is a small clone of Slayin:
+# this program is a small clone of Slayin,
 # a game in which you're a soldier fighting monsters in a 2d world.
 # a monster is killed upon colliding with soldier's sword.
 # only controls used are left/right arrows to move and up arrow to jump.
+# feel free to checkout Slayin trailer: http://youtu.be/GC003ZiXkt8
+# or go ahead and buy it: https://itunes.apple.com/us/app/slayin/id548580856
 
 
 # imports
 import random
-import time
+from time import time
 
 import pygame
 
@@ -18,12 +20,20 @@ from pygame import display
 from pygame.locals import QUIT
 
 
+# globals
+WIDTH = 640
+HEIGHT = 320
+FPS = 60.0
+
+
 # classes
 class Player():
-    '''Player class - an object capable of moving left/right, jumping, holds a weapon.
+    '''
+    Player class - an object capable of moving left/right, jumping, holds a weapon.
+
     '''
 
-    def __init__(self, canvas, WIDTH, HEIGHT, x, y, w, h, color, direction, jump_direction, jump_height, gravity, health):
+    def __init__(self, canvas, x, y, w, h, color, direction, jump_direction, jump_height, gravity, health):
         '''Constructor, takes player's properties, like:
 
         (canvas, int, int, int, int, int, int, tuple, int)
@@ -31,8 +41,6 @@ class Player():
         '''
 
         self.canvas = canvas
-        self.WIDTH = WIDTH
-        self.HEIGHT = HEIGHT
         self.x = x
         self.y = y
         self.w = w
@@ -72,17 +80,17 @@ class Player():
         if self.direction < 0 and self.x > 0:
             self.x += 3 * self.direction
 
-        if self.direction > 0 and self.x + self.w < self.WIDTH:
+        if self.direction > 0 and self.x + self.w < WIDTH:
             self.x += 3 * self.direction
 
         # moving vertically
-        self.y += 8 * self.jump_direction * self.gravity
+        self.y += 15 * self.jump_direction * self.gravity
 
         if self.jump_direction < 0:
-            self.gravity *= 0.92
+            self.gravity *= 0.82
 
         else:
-            self.gravity *= 1.08
+            self.gravity *= 1.18
 
         if self.gravity <= 0.3:
             self.jump_direction *= -1
@@ -138,7 +146,7 @@ class Enemy():
     '''Enemy class - allows spawning of the enemies and their movement.
     '''
 
-    def __init__(self, canvas, WIDTH, x, y, w, h, color, health):
+    def __init__(self, canvas, x, y, w, h, color, health):
         '''Constructor, takes enemy's properties:
 
         (canvas, int, int, int, int, tuple, int)
@@ -146,14 +154,13 @@ class Enemy():
         '''
 
         self.canvas = canvas
-        self.WIDTH = WIDTH
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
         self.health = health
-        self.current_time = time.time()
+        self.current_time = time()
         self.move_interval = 1.5
         self.direction = 0
 
@@ -173,15 +180,15 @@ class Enemy():
             self.y -= 1
 
         # changing moving direction
-        if time.time() - self.current_time >= self.move_interval:
+        if time() - self.current_time >= self.move_interval:
             self.direction = random.randint(-1, 1)
-            self.current_time = time.time()
+            self.current_time = time()
 
         # moving horizontally
         if self.direction < 0 and self.x > 0:
             self.x += 0.5 * self.direction
 
-        if self.direction > 0 and self.x + self.w < self.WIDTH:
+        if self.direction > 0 and self.x + self.w < WIDTH:
             self.x += 0.5 * self.direction
 
 
@@ -201,9 +208,9 @@ class FlyingEnemy(Enemy):
             self.move_interval = 4
 
         # changing moving direction
-        if time.time() - self.current_time >= self.move_interval:
+        if time() - self.current_time >= self.move_interval:
             self.direction = random.randint(-1, 1)
-            self.current_time = time.time()
+            self.current_time = time()
 
             # descending
             self.descending_interval += 1
@@ -222,7 +229,7 @@ class FlyingEnemy(Enemy):
         if self.direction < 0 and self.x > 0:
             self.x += 0.7 * self.direction
 
-        if self.direction > 0 and self.x + self.w < self.WIDTH:
+        if self.direction > 0 and self.x + self.w < WIDTH:
             self.x += 0.7 * self.direction
 
 
@@ -230,13 +237,11 @@ class Medkit():
     '''This is a powerup that gives the player additional health.
     '''
 
-    def __init__(self, canvas, WIDTH, HEIGHT, x, y, w, h, color, health):
+    def __init__(self, canvas, x, y, w, h, color, health):
         '''Constructor method, takes all the important information to create a medkit.
         '''
 
         self.canvas = canvas
-        self.WIDTH = WIDTH
-        self.HEIGHT = HEIGHT
         self.x = x
         self.y = y
         self.w = w
@@ -255,7 +260,7 @@ class Medkit():
         '''Medkit falls from the sky and stops when hits the ground.
         '''
 
-        if self.y < self.HEIGHT - 80 - self.h:
+        if self.y < HEIGHT - 80 - self.h:
             self.y += 2
 
 
@@ -307,53 +312,57 @@ def collision(object1, object2, obj1_type, obj2_type):
 
 
 def display_score(time_at_start, score):
-    time_played = "%.2f" % (time.time() - time_at_start)
+    time_played = "%.2f" % (time() - time_at_start)
     score_message = "\nYou've been playing for {0} seconds and you've slain {1} enemies!!\nThanks for playing!!\n"
     print(score_message.format(time_played, score))
 
 
 def main():
+    # setup pygame
+    pygame.init()
+    canvas = display.set_mode((WIDTH, HEIGHT), 0, 16)
+    display.set_caption('Slayin Clone')
+
     # variables
     score = 0
     enemies = []
     medkits = []
-    time_playing = 0
     respawn_time = 0.5
     flying_enemy_spawn_interval = 0
     medkit_spawn_interval = 0
 
     # create the player
-    player = Player(canvas, WIDTH, HEIGHT, 300, 200, 40, 40, (210, 125, 44), 0, 0, 100, 1, 10)
+    player = Player(canvas, 300, 200, 40, 40, (210, 125, 44), 0, 0, 100, 1, 10)
     weapon = Weapon(canvas, 340, 210, 40, 15, (117, 113, 97))
 
-    time_at_start = time.time()
-    current_time = time.time()
-    prev_frame_time = time.time()
+    time_at_start = time()
+    current_time = time()
+    prev_frame_time = time()
 
     # main loop
     while True:
-        current_frame_time = time.time()
+        current_frame_time = time()
 
         if (current_frame_time - prev_frame_time) >= (1.0 / FPS):
-            prev_frame_time = time.time()
+            prev_frame_time = time()
 
             # fill the screen with background color
             canvas.fill((222, 238, 214))
 
             # spawning enemies
-            if time.time() - current_time >= respawn_time:
-                enemies.append(Enemy(canvas, WIDTH, random.randint(0, WIDTH - 40), HEIGHT, 40, 40, (89, 125, 206), 1))
-                current_time = time.time()
+            if time() - current_time >= respawn_time:
+                enemies.append(Enemy(canvas, random.randint(0, WIDTH - 40), HEIGHT, 40, 40, (89, 125, 206), 1))
+                current_time = time()
 
                 flying_enemy_spawn_interval += 1
                 if flying_enemy_spawn_interval == 10:
                     flying_enemy_spawn_interval = 0
-                    enemies.append(FlyingEnemy(canvas, WIDTH, random.randint(0, WIDTH - 40), -40, 40, 40, (89, 125, 206), 1))
+                    enemies.append(FlyingEnemy(canvas, random.randint(0, WIDTH - 40), -40, 40, 40, (89, 125, 206), 1))
 
                 medkit_spawn_interval += 1
                 if medkit_spawn_interval == 30:
                     medkit_spawn_interval = 0
-                    medkits.append(Medkit(canvas, WIDTH, HEIGHT, random.randint(0, WIDTH - 20), -20, 20, 20, (109, 170, 44), 1))
+                    medkits.append(Medkit(canvas, random.randint(0, WIDTH - 20), -20, 20, 20, (109, 170, 44), 1))
 
                 if score != 0 and score % 10 == 0:
                     if respawn_time > 0.2:
@@ -458,16 +467,5 @@ def main():
                     main()
 
 
-# screen size
-WIDTH = 640
-HEIGHT = 320
-FPS = 60.0
-
-# main
-# setup pygame
-pygame.init()
-canvas = display.set_mode((WIDTH, HEIGHT), 0, 16)
-display.set_caption('Slayin Clone')
-
-
-main()
+if __name__ == '__main__':
+    main()
