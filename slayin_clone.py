@@ -24,56 +24,65 @@ from pygame.locals import QUIT
 WIDTH = 640
 HEIGHT = 320
 FPS = 60.0
+GRAVITY = 0.18
+canvas = display.set_mode((WIDTH, HEIGHT), 0, 16)
+display.set_caption('Slayin Clone')
 
 
 # classes
 class Player():
     '''
-    Player class - an object capable of moving left/right, jumping, holds a weapon.
+    Player - an object capable of moving left/right, jumping, holds a weapon.
 
     '''
 
-    def __init__(self, canvas, x, y, w, h, color, direction, jump_direction, jump_height, gravity, health):
-        '''Constructor, takes player's properties, like:
+    def __init__(self, x, y, w, h, color, weapon):
+        '''
+        Constructor, takes player's properties, like:
 
-        (canvas, int, int, int, int, int, int, tuple, int)
+        (int, int, int, int, int, int, tuple, int)
 
         '''
 
-        self.canvas = canvas
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
-        self.direction = direction
-        self.jump_direction = jump_direction
-        self.jump_height = jump_height
-        self.gravity = gravity
-        self.health = health
+        self.weapon = weapon
 
+        self.direction = 0
+        self.jump_direction = 0
+        self.jump_height = 100
+        self.gravity = 1
+        self.health = 10
         self.invulnerable = 0
+        self.type = 'player'
 
-    def draw(self, weapon):
-        '''This function simply draws a rectangle that represents player's position,
+    def draw(self):
+        '''
+        This function draws a rectangle that represents player's position,
         as well as his weapon.
+
         '''
 
         rect = (self.x, self.y, self.w, self.h)
-        pygame.draw.rect(self.canvas, self.color, rect)
+        pygame.draw.rect(canvas, self.color, rect)
 
         if self.direction > 0:
-            weapon.x = self.x + self.w
-            weapon.y = self.y + 10
-            weapon.draw()
+            self.weapon.x = self.x + self.w
+            self.weapon.y = self.y + 10
+            self.weapon.draw()
 
         else:
-            weapon.x = self.x - weapon.w
-            weapon.y = self.y + 10
-            weapon.draw()
+            self.weapon.x = self.x - self.weapon.w
+            self.weapon.y = self.y + 10
+            self.weapon.draw()
 
     def move(self):
-        '''This function allows the player to move based on desired direction
+        '''
+        This function allows the player to move based on desired direction
+
         '''
 
         # moving horizontally
@@ -87,10 +96,10 @@ class Player():
         self.y += 15 * self.jump_direction * self.gravity
 
         if self.jump_direction < 0:
-            self.gravity *= 0.82
+            self.gravity *= 1 - GRAVITY
 
         else:
-            self.gravity *= 1.18
+            self.gravity *= 1 + GRAVITY
 
         if self.gravity <= 0.3:
             self.jump_direction *= -1
@@ -101,7 +110,9 @@ class Player():
             self.gravity = 2
 
     def jump(self):
-        '''This function allows the player to jump
+        '''
+        This function allows the player to jump
+
         '''
 
         # if player is on the ground - he can jump
@@ -109,7 +120,10 @@ class Player():
             self.jump_direction = -1
 
     def invulnerability(self):
-        '''After being hit by an enemy the player is invulnerable for a period of time
+        '''
+        After being hit by an enemy the player becomes invulnerable
+        for a period of time.
+
         '''
 
         if self.invulnerable > 0.01:
@@ -120,59 +134,72 @@ class Player():
 
 
 class Weapon():
-    '''Weapon class - allows killing enemies, is always in front of the player.
+    '''
+    Weapon class - allows killing enemies, is always in front of the player.
+
     '''
 
-    def __init__(self, canvas, x, y, w, h, color):
+    def __init__(self, x, y, w, h, color):
         '''
         '''
 
-        self.canvas = canvas
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
 
+        self.type = 'weapon'
+
     def draw(self):
-        '''This function draws the weapon in front of the player.
+        '''
+        This function draws the weapon in front of the player.
+
         '''
 
         rect = (self.x, self.y, self.w, self.h)
-        pygame.draw.rect(self.canvas, self.color, rect)
+        pygame.draw.rect(canvas, self.color, rect)
 
 
 class Enemy():
-    '''Enemy class - allows spawning of the enemies and their movement.
+    '''
+    Enemy class - allows spawning of the enemies and their movement.
+
     '''
 
-    def __init__(self, canvas, x, y, w, h, color, health):
-        '''Constructor, takes enemy's properties:
+    def __init__(self, x, y, w, h, color):
+        '''
+        Constructor, takes enemy's properties:
 
-        (canvas, int, int, int, int, tuple, int)
+        (int, int, int, int, tuple, int)
 
         '''
 
-        self.canvas = canvas
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.color = color
-        self.health = health
+
+        self.health = 1
         self.current_time = time()
         self.move_interval = 1.5
         self.direction = 0
+        self.type = 'enemy'
 
     def draw(self):
-        '''This function simply draws a rectangle that represents an enemy.
+        '''
+        This function simply draws a rectangle that represents an enemy.
+
         '''
 
         rect = (self.x, self.y, self.w, self.h)
-        pygame.draw.rect(self.canvas, self.color, rect)
+        pygame.draw.rect(canvas, self.color, rect)
 
     def move(self):
-        '''This function takes care of enemy's movement(including spawning).
+        '''
+        This function takes care of enemy's movement(including spawning).
+
         '''
 
         # spawning
@@ -193,11 +220,17 @@ class Enemy():
 
 
 class FlyingEnemy(Enemy):
-    '''This is a class for flying enemies - very similiar to Enemy, except they move differently.
+    '''
+    This is a class for flying enemies - very similiar to Enemy,
+    except they move differently.
+
     '''
 
     def move(self):
-        '''This function takes care of flying enemy's movement(including spawning and descending).
+        '''
+        This function takes care of flying enemy's movement,
+        including spawning and descending.
+
         '''
 
         # spawning
@@ -234,14 +267,18 @@ class FlyingEnemy(Enemy):
 
 
 class Medkit():
-    '''This is a powerup that gives the player additional health.
+    '''
+    This is a powerup that gives the player additional health.
+
     '''
 
-    def __init__(self, canvas, x, y, w, h, color, health):
-        '''Constructor method, takes all the important information to create a medkit.
+    def __init__(self, x, y, w, h, color, health):
+        '''
+        Constructor method, takes all the important information
+        to create a medkit object.
+
         '''
 
-        self.canvas = canvas
         self.x = x
         self.y = y
         self.w = w
@@ -249,15 +286,21 @@ class Medkit():
         self.color = color
         self.health = health
 
+        self.type = 'medkit'
+
     def draw(self):
-        '''This function draws a medkit.
+        '''
+        This function draws a medkit.
+
         '''
 
         rect = (self.x, self.y, self.w, self.h)
-        pygame.draw.rect(self.canvas, self.color, rect)
+        pygame.draw.rect(canvas, self.color, rect)
 
     def move(self):
-        '''Medkit falls from the sky and stops when hits the ground.
+        '''
+        Medkit falls from the sky and stops when hits the ground.
+
         '''
 
         if self.y < HEIGHT - 80 - self.h:
@@ -265,18 +308,20 @@ class Medkit():
 
 
 # functions
-def collision(object1, object2, obj1_type, obj2_type):
-    '''This function takes 2 objects of a class and checks if they collided.
+def collision(object1, object2):
+    '''
+    This function takes 2 objects of a class and checks if they collided.
+
     '''
 
     if object1.x + object1.w > object2.x and object2.x + object2.w > object1.x and \
        object1.y + object1.h > object2.y and object2.y + object2.h > object1.y:
 
         # collision for enemies(they collide with player and weapons)
-        if obj1_type == "enemy" or obj2_type == "enemy":
+        if object1.type == "enemy" or object2.type == "enemy":
             # if obj1 is an enemy, obj2 is either player or weapon
-            if obj1_type == "enemy":
-                if obj2_type == "player":
+            if object1.type == "enemy":
+                if object2.type == "player":
                     if object2.invulnerable == 0:
                         object2.health -= 1
                         print("You've been hit! %d lives left!" % object2.health)
@@ -287,7 +332,7 @@ def collision(object1, object2, obj1_type, obj2_type):
 
             # if obj2 is an enemy, obj1 is either player or weapon
             else:
-                if obj1_type == "player":
+                if object1.type == "player":
                     if object1.invulnerable == 0:
                         object1.health -= 1
                         print("You've been hit! %d lives left!" % object1.health)
@@ -297,31 +342,35 @@ def collision(object1, object2, obj1_type, obj2_type):
                     object2.health -= 1
 
         # collision for medkits(they collide only with player)
-        elif obj1_type == "medkit" or obj2_type == "medkit":
-            if obj1_type == "medkit":
-                if obj2_type == "player":
+        elif object1.type == "medkit" or object2.type == "medkit":
+            if object1.type == "medkit":
+                if object2.type == "player":
                     object2.health += 1
                     object1.health -= 1
                     print("You've obtained a medkit! %d lives left!" % object2.health)
 
             else:
-                if obj1_type == "player":
+                if object1.type == "player":
                     object1.health += 1
                     object2.health -= 1
                     print("You've obtained a medkit! %d lives left!" % object1.health)
 
 
 def display_score(time_at_start, score):
+    '''
+    '''
+
     time_played = "%.2f" % (time() - time_at_start)
     score_message = "\nYou've been playing for {0} seconds and you've slain {1} enemies!!\nThanks for playing!!\n"
     print(score_message.format(time_played, score))
 
 
 def main():
+    '''
+    '''
+
     # setup pygame
     pygame.init()
-    canvas = display.set_mode((WIDTH, HEIGHT), 0, 16)
-    display.set_caption('Slayin Clone')
 
     # variables
     score = 0
@@ -332,8 +381,8 @@ def main():
     medkit_spawn_interval = 0
 
     # create the player
-    player = Player(canvas, 300, 200, 40, 40, (210, 125, 44), 0, 0, 100, 1, 10)
-    weapon = Weapon(canvas, 340, 210, 40, 15, (117, 113, 97))
+    weapon = Weapon(340, 210, 40, 15, (117, 113, 97))
+    player = Player(300, 200, 40, 40, (210, 125, 44), weapon)
 
     time_at_start = time()
     current_time = time()
@@ -351,18 +400,18 @@ def main():
 
             # spawning enemies
             if time() - current_time >= respawn_time:
-                enemies.append(Enemy(canvas, random.randint(0, WIDTH - 40), HEIGHT, 40, 40, (89, 125, 206), 1))
+                enemies.append(Enemy(random.randint(0, WIDTH - 40), HEIGHT, 40, 40, (89, 125, 206)))
                 current_time = time()
 
                 flying_enemy_spawn_interval += 1
                 if flying_enemy_spawn_interval == 10:
                     flying_enemy_spawn_interval = 0
-                    enemies.append(FlyingEnemy(canvas, random.randint(0, WIDTH - 40), -40, 40, 40, (89, 125, 206), 1))
+                    enemies.append(FlyingEnemy(random.randint(0, WIDTH - 40), -40, 40, 40, (89, 125, 206)))
 
                 medkit_spawn_interval += 1
                 if medkit_spawn_interval == 30:
                     medkit_spawn_interval = 0
-                    medkits.append(Medkit(canvas, random.randint(0, WIDTH - 20), -20, 20, 20, (109, 170, 44), 1))
+                    medkits.append(Medkit(random.randint(0, WIDTH - 20), -20, 20, 20, (109, 170, 44)))
 
                 if score != 0 and score % 10 == 0:
                     if respawn_time > 0.2:
@@ -377,7 +426,7 @@ def main():
             player.move()
 
             # draw player
-            player.draw(weapon)
+            player.draw()
 
             # invulnerability handling
             player.invulnerability()
@@ -397,7 +446,7 @@ def main():
                 medkit.draw()
 
                 # collision detecion
-                collision(medkit, player, "medkit", "player")
+                collision(medkit, player)
 
                 if medkit.health == 0:
                     del medkits[i]
@@ -405,8 +454,8 @@ def main():
             # collision handling
             # player collides with enemies
             for i, enemy in enumerate(enemies):
-                collision(enemy, weapon, "enemy", "weapon")
-                collision(enemy, player, "enemy", "player")
+                collision(enemy, weapon)
+                collision(enemy, player)
 
                 if enemy.health == 0:
                     score += 1
