@@ -32,15 +32,15 @@ display.set_caption('Slayin Clone')
 # classes
 class Player():
     '''
-    Player - an object capable of moving left/right, jumping, holds a weapon.
+    Player - an object capable of moving left/right, jumping, holds a Weapon.
 
     '''
 
     def __init__(self, x, y, w, h, color, weapon):
         '''
-        Constructor, takes player's properties, like:
+        Constructor, takes Player's properties:
 
-        (int, int, int, int, int, int, tuple, int)
+        (int, int, int, int, (ints), Weapon())
 
         '''
 
@@ -61,8 +61,8 @@ class Player():
 
     def draw(self):
         '''
-        This function draws a rectangle that represents player's position,
-        as well as his weapon.
+        Draws a rectangle that represents Player's position,
+        as well as his Weapon.
 
         '''
 
@@ -81,7 +81,7 @@ class Player():
 
     def move(self):
         '''
-        This function allows the player to move based on desired direction
+        Moves the Player in a desired direction.
 
         '''
 
@@ -111,7 +111,7 @@ class Player():
 
     def jump(self):
         '''
-        This function allows the player to jump
+        Allows the Player to jump.
 
         '''
 
@@ -121,7 +121,7 @@ class Player():
 
     def invulnerability(self):
         '''
-        After being hit by an enemy the player becomes invulnerable
+        After being hit by an enemy the Player becomes invulnerable
         for a period of time.
 
         '''
@@ -135,12 +135,16 @@ class Player():
 
 class Weapon():
     '''
-    Weapon class - allows killing enemies, is always in front of the player.
+    Weapon class - allows killing Enemies, is always in front of the Player.
 
     '''
 
     def __init__(self, x, y, w, h, color):
         '''
+        Constructor, takes Weapon's properties:
+
+        (int, int, int, int, (ints))
+
         '''
 
         self.x = x
@@ -153,7 +157,7 @@ class Weapon():
 
     def draw(self):
         '''
-        This function draws the weapon in front of the player.
+        Draws a rectangle that represents Weapon's position.
 
         '''
 
@@ -163,15 +167,15 @@ class Weapon():
 
 class Enemy():
     '''
-    Enemy class - allows spawning of the enemies and their movement.
+    Enemy class - allows spawning of the Enemies and their movement.
 
     '''
 
     def __init__(self, x, y, w, h, color):
         '''
-        Constructor, takes enemy's properties:
+        Constructor, takes Enemy's properties:
 
-        (int, int, int, int, tuple, int)
+        (int, int, int, int, (ints))
 
         '''
 
@@ -189,7 +193,7 @@ class Enemy():
 
     def draw(self):
         '''
-        This function simply draws a rectangle that represents an enemy.
+        Draws a rectangle that represents an Enemy.
 
         '''
 
@@ -198,7 +202,7 @@ class Enemy():
 
     def move(self):
         '''
-        This function takes care of enemy's movement(including spawning).
+        Moves Enemy in a desired direction.
 
         '''
 
@@ -221,15 +225,14 @@ class Enemy():
 
 class FlyingEnemy(Enemy):
     '''
-    This is a class for flying enemies - very similiar to Enemy,
+    This is a class for Flying Enemies - very similiar to Enemy,
     except they move differently.
 
     '''
 
     def move(self):
         '''
-        This function takes care of flying enemy's movement,
-        including spawning and descending.
+        Moves Flying Enemy in a desired direction.
 
         '''
 
@@ -268,14 +271,15 @@ class FlyingEnemy(Enemy):
 
 class Medkit():
     '''
-    This is a powerup that gives the player additional health.
+    This is a powerup that gives the Player additional health.
 
     '''
 
-    def __init__(self, x, y, w, h, color, health):
+    def __init__(self, x, y, w, h, color):
         '''
-        Constructor method, takes all the important information
-        to create a medkit object.
+        Constructor, takes Medkit's properties:
+
+        (int, int, int, int, (ints))
 
         '''
 
@@ -284,13 +288,13 @@ class Medkit():
         self.w = w
         self.h = h
         self.color = color
-        self.health = health
 
+        self.health = 1
         self.type = 'medkit'
 
     def draw(self):
         '''
-        This function draws a medkit.
+        Draws a rectangle that represents Medkit's position.
 
         '''
 
@@ -310,7 +314,7 @@ class Medkit():
 # functions
 def collision(object1, object2):
     '''
-    This function takes 2 objects of a class and checks if they collided.
+    Takes 2 objects of a class and checks if they collided.
 
     '''
 
@@ -358,6 +362,8 @@ def collision(object1, object2):
 
 def display_score(time_at_start, score):
     '''
+    Displays score at the end of the game.
+
     '''
 
     time_played = "%.2f" % (time() - time_at_start)
@@ -367,6 +373,8 @@ def display_score(time_at_start, score):
 
 def main():
     '''
+    Main function - takes care of all the logic and human-computer interaction.
+
     '''
 
     # setup pygame
