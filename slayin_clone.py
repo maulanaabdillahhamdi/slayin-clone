@@ -171,20 +171,18 @@ class Enemy():
 
     '''
 
-    def __init__(self, x, y, w, h, color):
+    def __init__(self, y):
         '''
-        Constructor, takes Enemy's properties:
-
-        (int, int, int, int, (ints))
+        Constructor.
 
         '''
 
-        self.x = x
         self.y = y
-        self.w = w
-        self.h = h
-        self.color = color
 
+        self.x = random.randint(0, WIDTH - 40)
+        self.w = 40
+        self.h = self.w
+        self.color = (89, 125, 206)
         self.health = 1
         self.current_time = time()
         self.move_interval = 1.5
@@ -275,19 +273,17 @@ class Medkit():
 
     '''
 
-    def __init__(self, x, y, w, h, color):
+    def __init__(self):
         '''
-        Constructor, takes Medkit's properties:
-
-        (int, int, int, int, (ints))
+        Constructor.
 
         '''
 
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.color = color
+        self.w = 20
+        self.h = self.w
+        self.x = random.randint(0, WIDTH - 20)
+        self.y = -self.w
+        self.color = (109, 170, 44)
 
         self.health = 1
         self.type = 'medkit'
@@ -318,6 +314,9 @@ def collision(object1, object2):
 
     '''
 
+    hit_msg = "You've been hit! {} lives left!"
+    medkit_msg = "You've obtained a medkit! {} lives left!"
+
     if object1.x + object1.w > object2.x and object2.x + object2.w > object1.x and \
        object1.y + object1.h > object2.y and object2.y + object2.h > object1.y:
 
@@ -328,7 +327,7 @@ def collision(object1, object2):
                 if object2.type == "player":
                     if object2.invulnerable == 0:
                         object2.health -= 1
-                        print("You've been hit! %d lives left!" % object2.health)
+                        print hit_msg.format(object2.health)
                         object2.invulnerable = 0.5
 
                 else:
@@ -339,7 +338,7 @@ def collision(object1, object2):
                 if object1.type == "player":
                     if object1.invulnerable == 0:
                         object1.health -= 1
-                        print("You've been hit! %d lives left!" % object1.health)
+                        print hit_msg.format(object1.health)
                         object1.invulnerable = 0.5
 
                 else:
@@ -351,13 +350,13 @@ def collision(object1, object2):
                 if object2.type == "player":
                     object2.health += 1
                     object1.health -= 1
-                    print("You've obtained a medkit! %d lives left!" % object2.health)
+                    print medkit_msg.format(object2.health)
 
             else:
                 if object1.type == "player":
                     object1.health += 1
                     object2.health -= 1
-                    print("You've obtained a medkit! %d lives left!" % object1.health)
+                    print medkit_msg.format(object1.health)
 
 
 def display_score(time_at_start, score):
@@ -366,9 +365,10 @@ def display_score(time_at_start, score):
 
     '''
 
-    time_played = "%.2f" % (time() - time_at_start)
-    score_message = "\nYou've been playing for {0} seconds and you've slain {1} enemies!!\nThanks for playing!!\n"
-    print(score_message.format(time_played, score))
+    time_played = "{:.2f}".format(time() - time_at_start)
+    score_message = "\nYou've been playing for {} seconds and you've slain \
+                     {} enemies!!\nThanks for playing!!\n"
+    print score_message.format(time_played, score)
 
 
 def main():
@@ -408,18 +408,18 @@ def main():
 
             # spawning enemies
             if time() - current_time >= respawn_time:
-                enemies.append(Enemy(random.randint(0, WIDTH - 40), HEIGHT, 40, 40, (89, 125, 206)))
+                enemies.append(Enemy(HEIGHT))
                 current_time = time()
 
                 flying_enemy_spawn_interval += 1
                 if flying_enemy_spawn_interval == 10:
                     flying_enemy_spawn_interval = 0
-                    enemies.append(FlyingEnemy(random.randint(0, WIDTH - 40), -40, 40, 40, (89, 125, 206)))
+                    enemies.append(FlyingEnemy(-40))
 
                 medkit_spawn_interval += 1
                 if medkit_spawn_interval == 30:
                     medkit_spawn_interval = 0
-                    medkits.append(Medkit(random.randint(0, WIDTH - 20), -20, 20, 20, (109, 170, 44)))
+                    medkits.append(Medkit())
 
                 if score != 0 and score % 10 == 0:
                     if respawn_time > 0.2:
@@ -467,7 +467,8 @@ def main():
 
                 if enemy.health == 0:
                     score += 1
-                    print("You've slain an enemy! Your score is %d!" % score)
+                    print "You've slain an enemy! \
+                           Your score is {}!".format(score)
                     del enemies[i]
 
             # update display
