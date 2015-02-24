@@ -36,21 +36,21 @@ class Player():
 
     '''
 
-    def __init__(self, x, y, w, h, color, weapon):
+    def __init__(self, weapon):
         '''
-        Constructor, takes Player's properties:
+        Constructor.
 
-        (int, int, int, int, (ints), Weapon())
+        (Weapon()) -> Player()
 
         '''
 
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.color = color
         self.weapon = weapon
 
+        self.x = 300
+        self.y = 200
+        self.w = 40
+        self.h = 40
+        self.color = (210, 125, 44)
         self.direction = 0
         self.jump_direction = 0
         self.jump_height = 100
@@ -139,20 +139,17 @@ class Weapon():
 
     '''
 
-    def __init__(self, x, y, w, h, color):
+    def __init__(self):
         '''
-        Constructor, takes Weapon's properties:
-
-        (int, int, int, int, (ints))
+        Constructor.
 
         '''
 
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.color = color
-
+        self.x = 340
+        self.y = 210
+        self.w = 40
+        self.h = 15
+        self.color = (117, 113, 97)
         self.type = 'weapon'
 
     def draw(self):
@@ -174,6 +171,8 @@ class Enemy():
     def __init__(self, y):
         '''
         Constructor.
+
+        (int) -> Enemy()
 
         '''
 
@@ -284,7 +283,6 @@ class Medkit():
         self.x = random.randint(0, WIDTH - 20)
         self.y = -self.w
         self.color = (109, 170, 44)
-
         self.health = 1
         self.type = 'medkit'
 
@@ -311,14 +309,17 @@ class Medkit():
 def collision(object1, object2):
     '''
     Takes 2 objects of a class and checks if they collided.
+    Performs collision related logic if objects collide.
 
     '''
 
     hit_msg = "You've been hit! {} lives left!"
     medkit_msg = "You've obtained a medkit! {} lives left!"
 
-    if object1.x + object1.w > object2.x and object2.x + object2.w > object1.x and \
-       object1.y + object1.h > object2.y and object2.y + object2.h > object1.y:
+    if object1.x + object1.w > object2.x and \
+       object2.x + object2.w > object1.x and \
+       object1.y + object1.h > object2.y and \
+       object2.y + object2.h > object1.y:
 
         # collision for enemies(they collide with player and weapons)
         if object1.type == "enemy" or object2.type == "enemy":
@@ -389,8 +390,8 @@ def main():
     medkit_spawn_interval = 0
 
     # create the player
-    weapon = Weapon(340, 210, 40, 15, (117, 113, 97))
-    player = Player(300, 200, 40, 40, (210, 125, 44), weapon)
+    weapon = Weapon()
+    player = Player(weapon)
 
     time_at_start = time()
     current_time = time()
