@@ -25,6 +25,9 @@ WIDTH = 640
 HEIGHT = 320
 FPS = 60.0
 GRAVITY = 0.18
+GROUND_PROPERTIES = (0, 240, 640, 80)
+GROUND_COLOR = (20, 18, 28)
+BACKGROUND_COLOR = (222, 238, 214)
 canvas = display.set_mode((WIDTH, HEIGHT), 0, 16)
 display.set_caption('Slayin Clone')
 
@@ -405,7 +408,7 @@ def main():
             prev_frame_time = time()
 
             # fill the screen with background color
-            canvas.fill((222, 238, 214))
+            canvas.fill(BACKGROUND_COLOR)
 
             # spawning enemies
             if time() - current_time >= respawn_time:
@@ -427,8 +430,7 @@ def main():
                         respawn_time -= 0.01
 
             # draw ground
-            rect = (0, 240, 640, 80)
-            pygame.draw.rect(canvas, (20, 18, 28), rect)
+            pygame.draw.rect(canvas, GROUND_COLOR, GROUND_PROPERTIES)
 
             # player handling
             # move player
