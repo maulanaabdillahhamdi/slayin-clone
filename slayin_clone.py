@@ -375,6 +375,29 @@ def display_score(time_at_start, score):
     print score_message.format(time_played, score)
 
 
+def play_again():
+    '''
+    Waits for player input and decision whether to play again or quit.
+
+    '''
+
+    while True:
+        for event in pygame.event.get():
+            # handling quit event
+            if event.type is QUIT:
+                pygame.quit()
+                exit()
+
+            # closing the program
+            if event.type == 2:
+                if pygame.key.name(event.key) == "escape":
+                    pygame.quit()
+                    exit()
+
+                if pygame.key.name(event.key) == "r":
+                    main()
+
+
 def main():
     '''
     Main function - takes care of all the logic and human-computer interaction.
@@ -511,21 +534,7 @@ def main():
 
     display_score(time_at_start, score)
 
-    while True:
-        for event in pygame.event.get():
-            # handling quit event
-            if event.type is QUIT:
-                pygame.quit()
-                exit()
-
-            # closing the program
-            if event.type == 2:
-                if pygame.key.name(event.key) == "escape":
-                    pygame.quit()
-                    exit()
-
-                if pygame.key.name(event.key) == "r":
-                    main()
+    play_again()
 
 
 if __name__ == '__main__':
